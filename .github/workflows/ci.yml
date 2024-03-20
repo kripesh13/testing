@@ -1,54 +1,7 @@
-# name: Flutter CI
-
-# on:
-#   push:
-#     branches:
-#       - main
-#   pull_request:
-#     branches:
-#       - main
-
-# jobs:
-#   build:
-#     runs-on: ubuntu-latest
-
-#     steps:
-#     - name: Checkout repository
-#       uses: actions/checkout@v2
-
-#     - name: Set up Node.js
-#       uses: actions/setup-node@v2
-#       with:
-#         node-version: '20'
-
-#     - name: Cache Flutter SDK
-#       uses: actions/cache@v2
-#       with:
-#         path: ~/.flutter
-#         key: ${{ runner.os }}-flutter-${{ hashFiles('**/pubspec.yaml') }}
-#         restore-keys: |
-#           ${{ runner.os }}-flutter-
-
-#     - name: Install Flutter SDK
-#       run: |
-#         git clone https://github.com/flutter/flutter.git -b stable
-#         export PATH="$PATH:`pwd`/flutter/bin"
-#         flutter precache
-
-#     - name: Install Flutter dependencies
-#       run: flutter pub get
-
-#     - name: Run Flutter tests
-#       run: flutter test
-
-
-name: Flutter CI
+name: CI
 
 on:
   push:
-    branches:
-      - main
-  pull_request:
     branches:
       - main
 
@@ -57,34 +10,21 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
+      - name: Install Node.js
+        run: |
+          curl -sL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+          sudo apt-get install -y nodejs
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v2
-      with:
-        node-version: '14'
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.19.3"
 
-    - name: Cache Flutter SDK
-      uses: actions/cache@v2
-      with:
-        path: ~/.flutter
-        key: ${{ runner.os }}-flutter-${{ hashFiles('**/pubspec.yaml') }}
-        restore-keys: |
-          ${{ runner.os }}-flutter-
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Install Flutter SDK
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y libglu1-mesa
-        git clone https://github.com/flutter/flutter.git -b stable
-        export PATH="$PATH:`pwd`/flutter/bin"
+      - name: Install dependencies
+        run: flutter pub get
 
-    - name: Flutter doctor
-      run: flutter doctor
-
-    - name: Install Flutter dependencies
-      run: flutter pub get
-
-    - name: Run Flutter tests
-      run: flutter test
+      - name: Run tests
+        run: flutter test
